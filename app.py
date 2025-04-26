@@ -126,7 +126,9 @@ with st.container(border=True):
                     st.write(action["details"])
         with col2:
             st.write(f"**DOB:** {selected_ticket.dob}")
-            st.write(f"**Status:** {selected_ticket.status}")
+            st.write(
+                f"**Status:** {selected_ticket.status.capitalize() if selected_ticket.status else None}"
+            )
 
         st.divider()
 
@@ -151,11 +153,14 @@ with st.container(border=True):
         col1, col2, col3 = st.columns([1, 1, 4])
         with col1:
             if st.button("Mark Complete"):
+                supabase.table("tickets").update({"status": "completed"}).eq(
+                    "id", selected_ticket.id
+                ).execute()
                 st.success(f"Ticket {selected_ticket.id} marked as complete!")
                 # TODO: Update the ticket status in the database
         with col2:
             if st.button("Reassign"):
-                st.info(
+                st.warning(
                     f"Reassign functionality for ticket {selected_ticket.id} not implemented yet."
                 )
                 # TODO: Implement reassign functionality
