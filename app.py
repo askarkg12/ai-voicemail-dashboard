@@ -34,17 +34,15 @@ tickets: list[Ticket] = st.session_state["tickets"]
 
 # Define colors for action types (add more as needed)
 ACTION_COLORS = {
-    "urgent": "#b31b1d",
-    "login issue": "#d115c8",
-    "billing": "#f57f17",
-    "access": "#f9a825",
-    "reschedule": "#d115c8",
-    "feature request": "#f9a825",
-    "accessibility": "#d115c8",
-    "password": "#fdd835",
-    "appointment": "#fde661",
-    "resolved": "#81c784",
-    "transport": "#81c784",
+    "cancel": "#ff6666",
+    "reschedule": "#0000cc",
+    "travel": "#33cc33",
+    "access": "#ff33cc",
+    "translator": "#cc9900",
+    "accompany": "#00cc66",
+    "other": "#003399",
+    "no letter": "#006600",
+    "more info": "#996633",
     "DEFAULT": "#616161",  # Default color
 }
 
@@ -124,7 +122,7 @@ with st.container(border=True):
             st.subheader(selected_ticket.name)
             st.markdown("**Actions:**")
             for action in selected_ticket.actions:
-                with st.expander(f"{action['action']}", expanded=True):
+                with st.expander(f"**{action['action'].capitalize()}**"):
                     st.write(action["details"])
         with col2:
             st.write(f"**DOB:** {selected_ticket.dob}")
@@ -138,13 +136,13 @@ with st.container(border=True):
             st.subheader("AI Summary")
             st.write(selected_ticket.ai_summary)
         with col2:
-            with st.expander("See transcript >"):
+            with st.expander("See transcript"):
                 st.write(selected_ticket.transcript)
 
             if selected_ticket.audio_url:
                 st.audio(selected_ticket.audio_url)
             else:
-                if st.button("Listen >"):
+                if st.button("Listen"):
                     st.warning("Audio playback not available for this item.")
 
         st.divider()
