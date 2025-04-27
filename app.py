@@ -151,7 +151,15 @@ with st.container(border=True):
             st.write(selected_ticket.ai_summary)
         with col2:
             with st.expander("See transcript"):
-                st.write(selected_ticket.transcript)
+                for line in selected_ticket.transcript.split("\n"):
+                    if line.startswith("Assistant:"):
+                        with st.chat_message("assistant"):
+                            st.write(line)
+                    elif line.startswith("User:"):
+                        with st.chat_message("user"):
+                            st.write(line)
+                    else:
+                        st.write(line)
 
             if selected_ticket.audio_url:
                 st.audio(selected_ticket.audio_url)
