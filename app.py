@@ -73,19 +73,28 @@ with st.sidebar:
     menu_items = [
         sac.MenuItem(
             label=ticket.name,
-            tag=[
-                sac.Tag(
-                    action["action"],
-                    color=get_action_color(action["action"]),
-                )
-                for action in ticket.actions
-            ],
+            tag=(
+                [
+                    sac.Tag(
+                        action["action"],
+                        color=get_action_color(action["action"]),
+                    )
+                    for action in ticket.actions
+                ]
+                if ticket.actions
+                else None
+            ),
             description=datetime.datetime.fromisoformat(ticket.created_at).strftime(
                 "%b %d, %Y, %H:%M"
             ),
         )
         for ticket in tickets
     ]
+
+    st.logo(
+        "assets/tape_logo.png",
+        size="large",
+    )
 
     # selected_label will be the label string returned by sac.menu
     selected_index = sac.menu(
@@ -106,6 +115,7 @@ with st.sidebar:
 
 
 # --- Main Area ---
+selected_ticket: Ticket | None
 # Find the selected ticket *after* potential selection updates
 with st.container(border=True):
     selected_ticket = None
@@ -121,10 +131,11 @@ with st.container(border=True):
         with col1:
             st.subheader(selected_ticket.name)
             st.markdown("**Actions:**")
-            for action in selected_ticket.actions:
+            for action in selected_ticket.actions if selected_ticket.actions else []:
                 with st.expander(f"**{action['action'].capitalize()}**"):
                     st.write(action["details"])
         with col2:
+            st.write(f"**Ticket ID:** {selected_ticket.id}")
             st.write(f"**DOB:** {selected_ticket.dob}")
             st.write(
                 f"**Status:** {selected_ticket.status.capitalize() if selected_ticket.status else None}"
@@ -150,20 +161,24 @@ with st.container(border=True):
         st.divider()
 
         # --- Action Buttons ---
-        col1, col2, col3 = st.columns([1, 1, 4])
+        col1, col2, col3 = st.columns([2, 1, 3])
         with col1:
-            if st.button("Mark Complete"):
-                supabase.table("tickets").update({"status": "completed"}).eq(
-                    "id", selected_ticket.id
-                ).execute()
-                st.success(f"Ticket {selected_ticket.id} marked as complete!")
-                # TODO: Update the ticket status in the database
+            new_status = st.selectbox(
+                "New Status",
+                options=["Pending", "Completed", "Cancelled"],
+                index=None,
+            )
         with col2:
-            if st.button("Reassign"):
-                st.warning(
-                    f"Reassign functionality for ticket {selected_ticket.id} not implemented yet."
-                )
-                # TODO: Implement reassign functionality
+            st.write("")
+            if st.button("Update Status"):
+                if new_status is not None:
+                    supabase.table("tickets").update({"status": new_status.lower()}).eq(
+                        "id", selected_ticket.id
+                    ).execute()
+                    st.success(f"Ticket {selected_ticket.id} marked as complete!")
+                else:
+                    st.warning("Please select a new status.")
+                # TODO: Update the ticket status in the database
 
     else:
         st.write("Select a voicemail from the list on the left to view details.")
