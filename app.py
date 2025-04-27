@@ -81,7 +81,7 @@ with st.sidebar:
                     )
                     for action in ticket.actions
                 ]
-                if ticket.actions
+                if ticket.actions and "action" in ticket.actions[0]
                 else None
             ),
             description=datetime.datetime.fromisoformat(ticket.created_at).strftime(
@@ -132,8 +132,9 @@ with st.container(border=True):
             st.subheader(selected_ticket.name)
             st.markdown("**Actions:**")
             for action in selected_ticket.actions if selected_ticket.actions else []:
-                with st.expander(f"**{action['action'].capitalize()}**"):
-                    st.write(action["details"])
+                if "action" in action:
+                    with st.expander(f"**{action['action'].capitalize()}**"):
+                        st.write(action["details"])
         with col2:
             st.write(f"**Ticket ID:** {selected_ticket.id}")
             st.write(f"**DOB:** {selected_ticket.dob}")
